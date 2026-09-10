@@ -1,122 +1,45 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BIG BROTHER — Staff Management</title>
-<style>
-*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:#f4f7fb;color:#1f2937}
-:root{--blue:#174a91;--line:#dce4ee;--muted:#6b7280;--green:#16794d}
-.page{padding:24px;max-width:1500px;margin:auto}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;margin-bottom:18px}
-h1{margin:0;color:var(--blue);font-size:26px}.sub{color:var(--muted);font-size:13px;margin-top:5px}
-.card{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 3px 12px #122b4d10;padding:18px;margin-bottom:16px}
-.tabs{display:flex;gap:8px;flex-wrap:wrap}.tab{border:1px solid var(--line);background:#fff;padding:10px 16px;border-radius:9px;cursor:pointer;font-weight:700}
-.tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
-.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.grid3{grid-template-columns:repeat(3,minmax(0,1fr))}
-label{display:block;font-size:12px;font-weight:700;margin-bottom:6px;color:#475569}input,select,textarea{width:100%;border:1px solid #cbd5e1;border-radius:8px;padding:10px 11px;font:inherit;background:#fff}
-textarea{min-height:76px;resize:vertical}.actions{display:flex;gap:9px;justify-content:flex-end;margin-top:14px}
-button.primary{background:var(--blue);color:#fff;border:0;border-radius:8px;padding:10px 16px;font-weight:800;cursor:pointer}button.secondary{background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 16px;font-weight:700;cursor:pointer}
-.section{display:none}.section.active{display:block}.status{padding:10px 12px;border-radius:8px;background:#eef4fb;color:#36516f;font-size:12px;margin-bottom:12px}
-.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:10px}table{border-collapse:collapse;width:100%;min-width:850px}th,td{padding:10px 11px;border-bottom:1px solid var(--line);text-align:left;font-size:12px}th{background:#f8fafc;color:#475569;position:sticky;top:0}
-.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#e9f8f0;color:#16794d;font-weight:800;font-size:11px}.money{font-weight:800}
-.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}.toolbar input{max-width:300px}
-@media(max-width:900px){.grid,.grid3{grid-template-columns:1fr 1fr}}@media(max-width:600px){.grid,.grid3{grid-template-columns:1fr}.page{padding:12px}}
-</style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BIG BROTHER — Staff Management Supabase</title>
+<style>html,body{margin:0;min-height:100%;background:#f4f7fb;font-family:Arial,sans-serif}.bb-loader{min-height:100vh;display:flex;align-items:center;justify-content:center}.bb-card{background:#fff;border:1px solid #d9e2ef;border-radius:14px;padding:22px 28px;box-shadow:0 8px 30px #173a6615;color:#17457a;font-weight:800}.bb-sub{margin-top:6px;color:#6b7280;font-size:12px;font-weight:600}</style>
 </head>
 <body>
-<div class="page">
-  <div class="top">
-    <div><h1>Staff Management</h1><div class="sub">BIG BROTHER company staff, departments and salary records</div></div>
-    <button class="secondary" onclick="loadAll()">↻ Refresh</button>
-  </div>
-
-  <div class="card tabs">
-    <button class="tab active" onclick="showTab('staff',this)">Staff</button>
-    <button class="tab" onclick="showTab('department',this)">Departments</button>
-    <button class="tab" onclick="showTab('salary',this)">Salary</button>
-  </div>
-
-  <section id="tab-staff" class="section active">
-    <div class="card">
-      <div class="status" id="staffStatus">Add company staff. Staff ID is generated automatically.</div>
-      <div class="grid">
-        <div><label>Staff Name *</label><input id="staffName"></div>
-        <div><label>Staff Code *</label><input id="staffCode" placeholder="e.g. DR001"></div>
-        <div><label>Department *</label><select id="staffDepartment" onchange="syncDepartment()"></select></div>
-        <div><label>Position *</label><input id="staffPosition" placeholder="Salesman / Driver / Inventory Controller"></div>
-        <div><label>Phone Number</label><input id="staffPhone"></div>
-        <div><label>Start Date</label><input id="staffStart" type="date"></div>
-        <div><label>Status</label><select id="staffStatusField"><option>Active</option><option>Inactive</option></select></div>
-        <div><label>Department Code</label><input id="staffDepartmentCode" readonly></div>
-      </div>
-      <div style="margin-top:12px"><label>Note</label><textarea id="staffNote"></textarea></div>
-      <div class="actions"><button class="secondary" onclick="clearStaff()">Clear</button><button class="primary" onclick="saveStaff()">Save Staff</button></div>
-    </div>
-
-    <div class="card">
-      <div class="toolbar"><strong>Staff Directory</strong><input id="staffSearch" placeholder="Search staff..." oninput="renderStaff()"></div>
-      <div class="tablewrap"><table><thead><tr><th>Staff ID</th><th>Name</th><th>Code</th><th>Department</th><th>Position</th><th>Phone</th><th>Start Date</th><th>Status</th></tr></thead><tbody id="staffRows"></tbody></table></div>
-    </div>
-  </section>
-
-  <section id="tab-department" class="section">
-    <div class="card">
-      <div class="status">Departments are dynamic. Add future departments here without changing system code.</div>
-      <div class="grid3">
-        <div><label>Department Name *</label><input id="depName"></div>
-        <div><label>Active</label><select id="depActive"><option value="true">Active</option><option value="false">Inactive</option></select></div>
-        <div><label>Note</label><input id="depNote"></div>
-      </div>
-      <div class="actions"><button class="primary" onclick="saveDepartment()">Save Department</button></div>
-    </div>
-    <div class="card"><div class="tablewrap"><table><thead><tr><th>Code</th><th>Department</th><th>Status</th><th>Note</th></tr></thead><tbody id="depRows"></tbody></table></div></div>
-  </section>
-
-  <section id="tab-salary" class="section">
-    <div class="card">
-      <div class="status">Saving a new salary closes the previous active salary record for the same staff. Salary history is preserved.</div>
-      <div class="grid">
-        <div><label>Staff *</label><select id="salStaff"></select></div>
-        <div><label>Base Salary *</label><input id="salBase" type="number" min="0" step="0.01" oninput="calcSalary()"></div>
-        <div><label>Currency</label><select id="salCurrency"><option>USD</option><option>KHR</option></select></div>
-        <div><label>Salary Type</label><select id="salType"><option>Monthly</option><option>Daily</option></select></div>
-        <div><label>Allowance</label><input id="salAllowance" type="number" min="0" step="0.01" value="0" oninput="calcSalary()"></div>
-        <div><label>Commission</label><input id="salCommission" type="number" min="0" step="0.01" value="0" oninput="calcSalary()"></div>
-        <div><label>Deduction</label><input id="salDeduction" type="number" min="0" step="0.01" value="0" oninput="calcSalary()"></div>
-        <div><label>Net Salary</label><input id="salNet" readonly></div>
-        <div><label>Effective From</label><input id="salFrom" type="date"></div>
-      </div>
-      <div style="margin-top:12px"><label>Note</label><textarea id="salNote"></textarea></div>
-      <div class="actions"><button class="primary" onclick="saveSalary()">Save Salary</button></div>
-    </div>
-    <div class="card"><div class="tablewrap"><table><thead><tr><th>Salary ID</th><th>Staff</th><th>Base</th><th>Allowance</th><th>Commission</th><th>Deduction</th><th>Net Salary</th><th>Currency</th><th>Effective From</th><th>Active</th></tr></thead><tbody id="salaryRows"></tbody></table></div></div>
-  </section>
-</div>
-
+<div class="bb-loader"><div class="bb-card">Loading BIG BROTHER Staff Management…<div class="bb-sub">Admin-only Supabase database</div></div></div>
 <script>
-/* Paste the Staff Database Web App /exec URL here after deployment. */
-const STAFF_DATABASE_API_URL = "PASTE_STAFF_DATABASE_WEB_APP_URL_HERE";
-let departments=[], staff=[], salaries=[];
+(async function(){
+  try{
+    const response=await fetch('legacy-google-v1.html?v=20260910-1',{cache:'no-store'});
+    if(!response.ok)throw new Error('Could not load Staff Management source.');
+    let html=await response.text();
 
-function apiReady(){return STAFF_DATABASE_API_URL.startsWith("https://script.google.com/");}
-function needApi(){if(apiReady())return true;alert("Deploy BIG_BROTHER_STAFF_DATABASE_V1.gs as Web App first, then paste the /exec URL into STAFF_DATABASE_API_URL.");return false;}
-function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\\"":"&quot;","'":"&#39;"}[c]));}
-function today(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
-function showTab(name,btn){document.querySelectorAll(".section").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));document.getElementById("tab-"+name).classList.add("active");btn.classList.add("active");}
-async function get(action,params={}){if(!needApi())throw new Error("API URL missing");const u=new URL(STAFF_DATABASE_API_URL);u.searchParams.set("action",action);Object.entries(params).forEach(([k,v])=>u.searchParams.set(k,v));const r=await fetch(u);return r.json();}
-function post(action,data){return new Promise((resolve,reject)=>{if(!needApi())return reject(new Error("API URL missing"));const n="staff_"+Date.now()+"_"+Math.random().toString(36).slice(2);const f=document.createElement("iframe");f.name=n;f.style.display="none";document.body.appendChild(f);const form=document.createElement("form");form.method="POST";form.action=STAFF_DATABASE_API_URL;form.target=n;form.style.display="none";form.innerHTML=`<input name="action"><input name="data">`;form.action.value=STAFF_DATABASE_API_URL;form.elements.action.value=action;form.elements.data.value=JSON.stringify(data);document.body.appendChild(form);form.submit();setTimeout(()=>{form.remove();f.remove();resolve({success:true});},1800);});}
-async function loadAll(){if(!apiReady())return;try{const [d,s,sa]=await Promise.all([get("getDepartments",{includeInactive:"true"}),get("getStaff",{includeInactive:"true"}),get("getStaffSalary",{includeInactive:"true"})]);departments=d.data||[];staff=s.data||[];salaries=sa.data||[];renderDepartments();renderStaff();renderSalary();fillSelectors();}catch(e){console.error(e);}}
-function fillSelectors(){const dep=document.getElementById("staffDepartment");dep.innerHTML='<option value="">Select department</option>'+departments.filter(x=>x.active).map(x=>`<option value="${esc(x.departmentName)}" data-code="${esc(x.departmentCode)}">${esc(x.departmentName)}</option>`).join("");const ss=document.getElementById("salStaff");ss.innerHTML='<option value="">Select staff</option>'+staff.filter(x=>x.status==="Active").map(x=>`<option value="${esc(x.staffId)}">${esc(x.staffId)} — ${esc(x.staffName)} (${esc(x.position)})</option>`).join("");}
-function syncDepartment(){const el=document.getElementById("staffDepartment");const o=el.options[el.selectedIndex];document.getElementById("staffDepartmentCode").value=o?.dataset?.code||"";}
-function renderDepartments(){document.getElementById("depRows").innerHTML=departments.map(x=>`<tr><td>${esc(x.departmentCode)}</td><td>${esc(x.departmentName)}</td><td><span class="badge">${x.active?"Active":"Inactive"}</span></td><td>${esc(x.note)}</td></tr>`).join("")||'<tr><td colspan="4">No departments.</td></tr>';}
-function renderStaff(){const q=(document.getElementById("staffSearch")?.value||"").toLowerCase();const list=staff.filter(x=>[x.staffId,x.staffName,x.staffCode,x.department,x.position,x.phoneNumber].join(" ").toLowerCase().includes(q));document.getElementById("staffRows").innerHTML=list.map(x=>`<tr><td>${esc(x.staffId)}</td><td><strong>${esc(x.staffName)}</strong></td><td>${esc(x.staffCode)}</td><td>${esc(x.department)}</td><td>${esc(x.position)}</td><td>${esc(x.phoneNumber)}</td><td>${esc(x.startDate)}</td><td><span class="badge">${esc(x.status)}</span></td></tr>`).join("")||'<tr><td colspan="8">No staff.</td></tr>';}
-function renderSalary(){document.getElementById("salaryRows").innerHTML=salaries.map(x=>`<tr><td>${esc(x.salaryId)}</td><td>${esc(x.staffId)} — ${esc(x.staffName)}</td><td class="money">${Number(x.baseSalary||0).toLocaleString()}</td><td>${Number(x.allowance||0).toLocaleString()}</td><td>${Number(x.commission||0).toLocaleString()}</td><td>${Number(x.deduction||0).toLocaleString()}</td><td class="money">${Number(x.netSalary||0).toLocaleString()}</td><td>${esc(x.currency)}</td><td>${esc(x.effectiveFrom)}</td><td><span class="badge">${x.active?"Active":"Closed"}</span></td></tr>`).join("")||'<tr><td colspan="10">No salary records.</td></tr>';}
-function clearStaff(){["staffName","staffCode","staffPosition","staffPhone","staffNote","staffDepartmentCode"].forEach(id=>document.getElementById(id).value="");document.getElementById("staffDepartment").value="";document.getElementById("staffStart").value=today();document.getElementById("staffStatusField").value="Active";}
-async function saveDepartment(){const name=document.getElementById("depName").value.trim();if(!name)return alert("Department Name is required.");await post("saveDepartment",{departmentName:name,active:document.getElementById("depActive").value==="true",note:document.getElementById("depNote").value.trim()});document.getElementById("depName").value="";document.getElementById("depNote").value="";setTimeout(loadAll,700);}
-async function saveStaff(){const department=document.getElementById("staffDepartment").value;const data={staffName:document.getElementById("staffName").value.trim(),staffCode:document.getElementById("staffCode").value.trim(),departmentCode:document.getElementById("staffDepartmentCode").value,department,position:document.getElementById("staffPosition").value.trim(),phoneNumber:document.getElementById("staffPhone").value.trim(),startDate:document.getElementById("staffStart").value,status:document.getElementById("staffStatusField").value,note:document.getElementById("staffNote").value.trim()};if(!data.staffName||!data.staffCode||!data.department||!data.position)return alert("Staff Name, Staff Code, Department and Position are required.");await post("saveStaff",data);clearStaff();setTimeout(loadAll,700);}
-function calcSalary(){const n=id=>Number(document.getElementById(id).value)||0;document.getElementById("salNet").value=(n("salBase")+n("salAllowance")+n("salCommission")-n("salDeduction")).toFixed(2);}
-async function saveSalary(){const data={staffId:document.getElementById("salStaff").value,baseSalary:Number(document.getElementById("salBase").value)||0,currency:document.getElementById("salCurrency").value,salaryType:document.getElementById("salType").value,allowance:Number(document.getElementById("salAllowance").value)||0,commission:Number(document.getElementById("salCommission").value)||0,deduction:Number(document.getElementById("salDeduction").value)||0,effectiveFrom:document.getElementById("salFrom").value,note:document.getElementById("salNote").value.trim()};if(!data.staffId)return alert("Please select Staff.");if(data.baseSalary<0)return alert("Invalid salary.");await post("saveStaffSalary",data);setTimeout(loadAll,700);}
-document.getElementById("staffStart").value=today();document.getElementById("salFrom").value=today();calcSalary();loadAll();
+    const adapter='<scr'+'ipt src="supabase-staff-adapter.js?v=20260910-1"></scr'+'ipt>';
+    const headClose=html.toLowerCase().indexOf('</head>');
+    if(headClose<0)throw new Error('Staff Management source is missing </head>.');
+    html=html.slice(0,headClose)+adapter+'\n'+html.slice(headClose);
+
+    html=html.replace(
+      'function apiReady(){return STAFF_DATABASE_API_URL.startsWith("https://script.google.com/");}',
+      'function apiReady(){return true;}'
+    );
+
+    const marker='document.getElementById("staffStart").value=today();document.getElementById("salFrom").value=today();calcSalary();loadAll();';
+    const replacement=`// SUPABASE CUTOVER\nget = window.BBStaffAdapter.get;\npost = window.BBStaffAdapter.post;\n${marker}`;
+    if(!html.includes(marker))throw new Error('Staff Management initialization marker was not found.');
+    html=html.replace(marker,replacement);
+
+    html=html.replace('<title>BIG BROTHER — Staff Management</title>','<title>BIG BROTHER — Staff Management Supabase</title>');
+    html=html.replace('Staff Management','Staff Management · Supabase');
+
+    document.open();
+    document.write(html);
+    document.close();
+  }catch(error){
+    console.error(error);
+    document.body.innerHTML='<div class="bb-loader"><div class="bb-card">Could not open Staff Management<div class="bb-sub">'+String(error?.message||error)+'</div></div></div>';
+  }
+})();
 </script>
 </body>
 </html>
